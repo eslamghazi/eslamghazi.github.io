@@ -1,0 +1,170 @@
+classDiagram
+    %% Enums
+    class OrderStatus {
+        <<enumeration>>
+        Pending
+        Processing
+        Shipped
+        Delivered
+        Cancelled
+        Returned
+    }
+
+    class PaymentStatus {
+        <<enumeration>>
+        Pending
+        Completed
+        Failed
+        Refunded
+    }
+
+    class PaymentMethod {
+        <<enumeration>>
+        CreditCard
+        PayPal
+        COD
+    }
+
+    %% Identity 
+    class AspNetUsers {
+        string Id PK
+        string UserName
+        string Email
+        string PhoneNumber
+        string PasswordHash
+    }
+
+    class UserAddress {
+        int Id PK
+        string UserId FK
+        string FullAddress
+        string Street
+        string City
+        string Country
+        bool IsDefault
+    }
+    
+    %% Catalog
+    class Category {
+        int Id PK
+        string Name
+        string ImageUrl
+        datetime CreatedAt
+    }
+    
+    class Product {
+        int Id PK
+        string Name
+        string Description
+        decimal Price
+        int StockQuantity
+        int CategoryId FK
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    class ProductImage {
+        int Id PK
+        int ProductId FK
+        string ImageUrl
+        bool IsMain
+    }
+
+    %% Social
+    class ProductReview {
+        int Id PK
+        int ProductId FK
+        string UserId FK
+        int Rating
+        string Comment
+        datetime CreatedAt
+    }
+
+    class Wishlist {
+        int Id PK
+        string UserId FK
+        int ProductId FK
+        datetime CreatedAt
+    }
+
+    %% Sales
+    class Order {
+        int Id PK
+        string UserId FK
+        datetime OrderDate
+        decimal TotalAmount
+        OrderStatus Status
+        string ShippingAddress
+        int CouponId FK
+        datetime CreatedAt
+    }
+
+    class OrderItem {
+        int Id PK
+        int OrderId FK
+        int ProductId FK
+        int Quantity
+        decimal UnitPrice
+    }
+
+    %% Payments
+    class Payment {
+        int Id PK
+        int OrderId FK
+        PaymentMethod PaymentMethod
+        string TransactionId
+        decimal Amount
+        PaymentStatus Status
+        datetime PaymentDate
+    }
+
+    %% POSTPONED FEATURES (Namespace to separate them)
+    namespace Postponed {
+        class Coupon {
+            int Id PK
+            string Code
+            decimal DiscountAmount
+            datetime ExpiryDate
+            bool IsActive
+        }
+
+        class ProductVariant {
+            int Id PK
+            int ProductId FK
+            string Name
+            string Value
+            decimal PriceAdjustment
+            int StockQuantity
+        }
+
+        class Complaint {
+            int Id PK
+            string UserId FK
+            int OrderId FK
+            string Subject
+            string Description
+            string Status
+            datetime CreatedAt
+        }
+    }
+
+    %% Relationships
+    Category "1" -- "*" Product : contains
+    Product "1" -- "*" ProductImage : has_images
+    Product "1" -- "*" ProductReview : has_reviews
+    
+    AspNetUsers "1" -- "*" UserAddress : has_addresses
+    AspNetUsers "1" -- "*" Order : places
+    AspNetUsers "1" -- "*" ProductReview : writes
+    AspNetUsers "1" -- "*" Wishlist : favorites
+
+    Wishlist "*" -- "1" Product : contains
+
+    Order "1" -- "*" OrderItem : contains
+    Product "1" -- "*" OrderItem : included_in
+    Order "1" -- "1" Payment : paid_via
+
+    %% Postponed Relationships
+    Coupon "0..1" -- "*" Order : applied_to
+    Product "1" -- "*" ProductVariant : has_variants
+    AspNetUsers "1" -- "*" Complaint : files

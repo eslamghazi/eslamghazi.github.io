@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Database Design</title>
+    <style>
+        :root {
+            --header-height: 70px;
+            --primary-color: #2c3e50;
+            --text-color: #333;
+            --bg-color: #f5f5f7;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scrollbars */
+        }
+
+        header {
+            height: var(--header-height);
+            background-color: #ffffff;
+            padding: 0 2rem;
+            box-shadow: 0 1px 15px rgba(0,0,0,0.08); /* Soft shadow */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .branding {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .actions {
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-weight: 500;
+        }
+
+        main {
+            flex: 1; /* Takes remaining height */
+            position: relative;
+            background-color: #ffffff;
+        }
+
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="branding">
+            <h1>Ecommerce Graduation Project</h1>
+            <span class="subtitle">Database Schema & Architecture Diagram</span>
+        </div>
+    </header>
+    <main>
+        <iframe 
+            src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=Ecommerce%20DB%20Design.drawio&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1QICux0aihS1eyyjRsgrb1reDVuK7i6F9%26export%3Ddownload" 
+            frameborder="0" 
+            allowtransparency="true">
+        </iframe>
+    </main>
+</body>
+</html>
