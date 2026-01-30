@@ -8,11 +8,22 @@ The system is built around **ASP.NET Core Identity** for user management. It inc
 - **Sales**: Orders, Order Items
 - **Finance**: Payments
 
-## 1. Identity & Users
-We will use the standard `AspNetCore.Identity` tables.
-- **AspNetUsers**: Stores user info (Id, Email, PasswordHash, etc.).
-- **AspNetRoles**: Stores roles (Admin, Customer).
-- **AspNetUserRoles**: Links users to roles.
+## 1. Identity & Users (ASP.NET Core Identity)
+We will use the standard `AspNetCore.Identity` tables extended with custom fields.
+- **AspNetUsers**:
+  - `Id` (string, PK)
+  - `FirstName` (string)
+  - `LastName` (string)
+  - `UserName`, `Email`, `PasswordHash`, `PhoneNumber`
+- **AspNetRoles**: `Id`, `Name` (e.g. "Admin", "Customer")
+- **AspNetUserRoles**: Mapping table between Users and Roles.
+- **AspNetUserClaims**: Stats/Attributes for users.
+- **AspNetUserLogins**: External auth providers (Google, Facebook).
+- **AspNetUserTokens**: Logic tokens (Password Reset, Email Confirm, **Refresh Tokens**).
+  - `UserId` (PK)
+  - `LoginProvider` (PK)
+  - `Name` (PK)
+  - `Value` (The token string)
 
 ## 2. Catalog
 - **Categories**:
@@ -67,10 +78,10 @@ We will use the standard `AspNetCore.Identity` tables.
   - `UserId` (FK)
   - `OrderDate`
   - `TotalAmount`
-  - `Status` (Enum: OrderStatus)
-  - `CouponId` (FK, nullable)
+  - `ShippingCost` (decimal)
   - `ShippingAddress` (string, Snapshot of FullAddress)
-  - `PaymobOrderId` (string, External ID from Paymob)
+  - `PaymentId` (FK, ID of the successful payment)
+  - `ShipmentId` (FK, ID of the chosen shipment)
   - `CreatedAt`
 - **OrderItems**:
   - `Id` (int)
@@ -79,7 +90,17 @@ We will use the standard `AspNetCore.Identity` tables.
   - `Quantity`
   - `UnitPrice`
 
-## 6. Payments
+## 7. Shipments (New)
+- **Shipments**:
+  - `Id` (int)
+  - `OrderId` (FK)
+  - `TrackingNumber` (string)
+  - `Carrier` (string, e.g. "DHL", "Aramex")
+  - `ShipmentDate` (datetime)
+  - `EstimatedDelivery` (datetime)
+  - `Cost` (decimal)
+
+## 8. Paymob & Payments
 - **Payments**:
   - `Id` (int)
   - `OrderId` (FK)
@@ -89,11 +110,10 @@ We will use the standard `AspNetCore.Identity` tables.
   - `Status` (Enum: PaymentStatus)
   - `Status` (Enum: PaymentStatus)
   - `PaymentDate`
-  - `ResponseCode` (string, e.g. "APPROVED", "REJECTED")
-  - `MaskedPan` (string, e.g. "**** **** **** 1234")
-  - `SubType` (string, e.g. "VISA", "MasterCard", "Wallet")
+  - `Provider` (string, e.g. "Paymob", "PayPal")
+  - `Details` (string, JSON/Generic field for MaskedPan, SubType, etc.)
 
-## 7. Enums
+## 9. Enums
 - **OrderStatus**:
   - `Pending`, `Processing`, `Shipped`, `Delivered`, `Cancelled`, `Returned`
 - **PaymentStatus**:
@@ -135,10 +155,29 @@ classDiagram
     %% Identity 
     class AspNetUsers {
         string Id PK
+        string FirstName
+        string LastName
         string UserName
         string Email
         string PhoneNumber
         string PasswordHash
+    }
+
+    class AspNetRoles {
+        string Id PK
+        string Name
+    }
+
+    class AspNetUserRoles {
+        string UserId FK
+        string RoleId FK
+    }
+
+    class AspNetUserTokens {
+        string UserId PK
+        string LoginProvider PK
+        string Name PK
+        string Value
     }
 
     class UserAddress {
@@ -207,8 +246,7 @@ classDiagram
         decimal TotalAmount
         OrderStatus Status
         string ShippingAddress
-        int CouponId FK
-        string PaymobOrderId
+        string TransactionId
         datetime CreatedAt
     }
 
@@ -240,6 +278,10 @@ classDiagram
     Product "1" -- "*" ProductImage : has_images
     Product "1" -- "*" ProductReview : has_reviews
     
+    AspNetUsers "1" -- "*" AspNetUserTokens : has
+    AspNetUsers "1" -- "*" AspNetUserRoles : owns
+    AspNetRoles "1" -- "*" AspNetUserRoles : belongs_to
+    
     AspNetUsers "1" -- "*" UserAddress : has_addresses
     AspNetUsers "1" -- "*" Order : places
     AspNetUsers "1" -- "*" ProductReview : writes
@@ -249,5 +291,6 @@ classDiagram
 
     Order "1" -- "*" OrderItem : contains
     Product "1" -- "*" OrderItem : included_in
-    Order "1" -- "1" Payment : paid_via
+    Order "1" -- "1" Payment : has_succeeded
+    Order "1" -- "1" Shipment : has_chosen
 ```

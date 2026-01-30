@@ -28,10 +28,29 @@ classDiagram
     %% Identity 
     class AspNetUsers {
         string Id PK
+        string FirstName
+        string LastName
         string UserName
         string Email
         string PhoneNumber
         string PasswordHash
+    }
+
+    class AspNetRoles {
+        string Id PK
+        string Name
+    }
+
+    class AspNetUserRoles {
+        string UserId FK
+        string RoleId FK
+    }
+
+    class AspNetUserTokens {
+        string UserId
+        string LoginProvider
+        string Name
+        string Value
     }
 
     class UserAddress {
@@ -93,10 +112,22 @@ classDiagram
         string UserId FK
         datetime OrderDate
         decimal TotalAmount
+        decimal ShippingCost
         OrderStatus Status
         string ShippingAddress
-        int CouponId FK
+        int PaymentId FK
+        int ShipmentId FK
         datetime CreatedAt
+    }
+
+    class Shipment {
+        int Id PK
+        int OrderId FK
+        string TrackingNumber
+        string Carrier
+        datetime ShipmentDate
+        datetime EstimatedDelivery
+        decimal Cost
     }
 
     class OrderItem {
@@ -116,6 +147,8 @@ classDiagram
         decimal Amount
         PaymentStatus Status
         datetime PaymentDate
+        string Provider
+        string Details
     }
 
     %% Relationships
@@ -123,6 +156,10 @@ classDiagram
     Product "1" -- "*" ProductImage : has_images
     Product "1" -- "*" ProductReview : has_reviews
     
+    AspNetUsers "1" -- "*" AspNetUserTokens : has
+    AspNetUsers "1" -- "*" AspNetUserRoles : owns
+    AspNetRoles "1" -- "*" AspNetUserRoles : belongs_to
+
     AspNetUsers "1" -- "*" UserAddress : has_addresses
     AspNetUsers "1" -- "*" Order : places
     AspNetUsers "1" -- "*" ProductReview : writes
@@ -132,4 +169,5 @@ classDiagram
 
     Order "1" -- "*" OrderItem : contains
     Product "1" -- "*" OrderItem : included_in
-    Order "1" -- "1" Payment : paid_via
+    Order "1" -- "1" Payment : has_succeeded
+    Order "1" -- "1" Shipment : has_chosen
